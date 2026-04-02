@@ -81,6 +81,13 @@ tail -f shared/draft_native.log
 
 In this mode, draft-side rollback is done with `llama_memory_seq_rm(...)` against unconfirmed speculative tail tokens before the next round proposal.
 
+## Experiment Records
+
+- Timing experiment record: `EXPERIMENT_TIMING_2026-04-03.md`
+- Upstream `llama.cpp` patch snapshots used by this project:
+  - `upstream-patches/0001-examples-add-native-split-draft-verify-workers-for-s.patch`
+  - `upstream-patches/0002-feat-add-stage-timing-instrumentation-and-split-vs-n.patch`
+
 ## Run with custom models
 
 ```bash

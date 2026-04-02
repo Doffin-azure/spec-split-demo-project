@@ -1,0 +1,489 @@
+From e4ad79a8974fe71871343b8dcb2df248eab487ca Mon Sep 17 00:00:00 2001
+From: Doffin-azure <2043716678@qq.com>
+Date: Fri, 3 Apr 2026 00:39:46 +0800
+Subject: [PATCH 2/2] feat: add stage timing instrumentation and
+ split-vs-native experiment record
+
+---
+ .../EXPERIMENT_TIMING_2026-04-03.md           | 75 +++++++++++++++++++
+ .../spec-split-verify/spec-split-draft.cpp    | 57 +++++++++++++-
+ .../spec-split-verify/spec-split-verify.cpp   | 49 +++++++++++-
+ .../speculative-simple/speculative-simple.cpp | 47 ++++++++++++
+ 4 files changed, 224 insertions(+), 4 deletions(-)
+ create mode 100644 examples/spec-split-verify/EXPERIMENT_TIMING_2026-04-03.md
+
+diff --git a/examples/spec-split-verify/EXPERIMENT_TIMING_2026-04-03.md b/examples/spec-split-verify/EXPERIMENT_TIMING_2026-04-03.md
+new file mode 100644
+index 000000000..87d2d4ece
+--- /dev/null
++++ b/examples/spec-split-verify/EXPERIMENT_TIMING_2026-04-03.md
+@@ -0,0 +1,75 @@
++# Split vs Native Speculative Timing (2026-04-03)
++
++## Setup
++
++- machine: Apple M4 (Metal backend)
++- draft model: `qwen2.5-0.5b-instruct-q4_k_m.gguf`
++- verify/target model: `qwen2.5-1.5b-instruct-q4_k_m.gguf`
++- prompt: `Explain speculative decoding briefly.`
++- `n_max=4`, `max_output_tokens=24`, `ctx=512`
++
++## Compared implementations
++
++1. split-native-full
++   - `llama-spec-split-draft` + `llama-spec-split-verify`
++   - file-bus exchange via `state/proposal/decision`
++2. native in-process baseline
++   - `llama-speculative-simple`
++   - same model pair and greedy sampling
++
++## Instrumentation added
++
++- split draft:
++  - sync/rollback alignment time
++  - tail-logits refresh time
++  - draft generation time
++  - `decision_write -> next_draft_seen` communication latency
++- split verify:
++  - `proposal_write -> verify_seen` communication latency
++  - verify decode time
++  - verify sample-and-accept time
++  - KV rollback time
++- native speculative-simple:
++  - draft stage time
++  - target decode stage time
++  - sample-and-accept stage time
++  - post stage (`llama_memory_seq_rm`)
++
++## One-run summary (7 rounds)
++
++- split:
++  - draft generation avg: `30.51 ms`
++  - draft sync+tail prep avg: `1.95 + 11.94 ms`
++  - proposal->verify communication avg: `82.52 ms`
++  - decision->draft communication avg: `160.48 ms`
++  - verify decode avg: `6.22 ms` (warm rounds near `0.64 ms`)
++  - verify sample avg: `47.19 ms`
++  - verify rollback avg: `0.0024 ms`
++  - reject rounds: `4`
++- native speculative-simple:
++  - draft avg: `36.27 ms`
++  - decode avg: `0.87 ms`
++  - sample avg: `47.15 ms`
++  - post avg: `0.0019 ms`
++  - reject rounds: `4`
++
++## Warm-round comparison (excluding round 0)
++
++- split proposal->verify comm avg: `74.54 ms`
++- split decision->draft comm avg: `160.48 ms`
++- split draft compute avg: `25.26 ms`
++- split verify decode avg: `0.635 ms`
++- split verify sample avg: `47.52 ms`
++
++- native draft compute avg: `36.27 ms`
++- native decode avg: `0.869 ms`
++- native sample avg: `47.15 ms`
++- native total loop avg: `84.30 ms`
++
++## Conclusion
++
++- No severe discrepancy in core speculative logic stages:
++  - verify sample and rollback are aligned in scale between split and native.
++- Main performance gap comes from process exchange overhead in split mode:
++  - especially `decision -> next draft` latency.
++- To narrow the gap, reduce polling/file I/O overhead (event signaling or RPC stream/session reuse).
+diff --git a/examples/spec-split-verify/spec-split-draft.cpp b/examples/spec-split-verify/spec-split-draft.cpp
+index 5bcdabe0c..ce361f7a4 100644
+--- a/examples/spec-split-verify/spec-split-draft.cpp
++++ b/examples/spec-split-verify/spec-split-draft.cpp
+@@ -137,6 +137,10 @@ static bool decode_append(
+     return true;
+ }
+ 
++static int64_t now_us() {
++    return ggml_time_us();
++}
++
+ int main(int argc, char ** argv) {
+     std::setlocale(LC_NUMERIC, "C");
+     common_init();
+@@ -202,6 +206,7 @@ int main(int argc, char ** argv) {
+     LOG_INF("[draft-native] started, shared_dir=%s\n", args.shared_dir.c_str());
+ 
+     while (true) {
++        const int64_t t_loop_us = now_us();
+         json state = read_json(state_path);
+         json config = read_json(config_path);
+         if (state.is_null() || config.is_null()) {
+@@ -221,6 +226,7 @@ int main(int argc, char ** argv) {
+         const int round_id = state.value("round", 0);
+         const int accepted_pos = state.value("accepted_pos", 0);
+         const int n_max = config.value("n_max", args.n_max);
++        const int64_t t_state_seen_us = now_us();
+ 
+         json cur_prop = read_json(proposal_path);
+         if (!cur_prop.is_null() && cur_prop.value("round", -1) == round_id) {
+@@ -228,6 +234,20 @@ int main(int argc, char ** argv) {
+             continue;
+         }
+ 
++        int64_t t_decision_seen_us = 0;
++        int64_t decision_to_draft_seen_us = -1;
++        const json prev_decision = read_json(decision_path);
++        if (!prev_decision.is_null() && prev_decision.value("round", -1) == round_id - 1) {
++            t_decision_seen_us = now_us();
++            if (prev_decision.contains("timing") && prev_decision["timing"].is_object()) {
++                const auto & tim = prev_decision["timing"];
++                if (tim.contains("decision_write_us")) {
++                    const int64_t t_write_us = tim["decision_write_us"].get<int64_t>();
++                    decision_to_draft_seen_us = t_decision_seen_us - t_write_us;
++                }
++            }
++        }
++
+         // Authoritative accepted sequence from verify side.
+         std::vector<llama_token> accepted_ids;
+         if (state.contains("accepted_token_ids") && state["accepted_token_ids"].is_array()) {
+@@ -239,11 +259,15 @@ int main(int argc, char ** argv) {
+         target_seq.insert(target_seq.end(), accepted_ids.begin(), accepted_ids.end());
+ 
+         // Sync local draft context to authoritative sequence.
++        const int64_t t_sync_begin_us = now_us();
++        bool did_rollback = false;
++        bool did_hard_reset = false;
+         const size_t cp = lcp_len(prompt_dft, target_seq);
+         const bool mismatch_inside_prefix = cp < std::min(prompt_dft.size(), target_seq.size());
+ 
+         if (mismatch_inside_prefix) {
+             // Hard reset if prefix diverged.
++            did_hard_reset = true;
+             llama_memory_clear(llama_get_memory(ctx), false);
+             prompt_dft.clear();
+             if (!decode_append(ctx, batch, prompt_dft, target_seq)) {
+@@ -254,6 +278,7 @@ int main(int argc, char ** argv) {
+         } else {
+             if (prompt_dft.size() > target_seq.size()) {
+                 // Rollback speculative tail not confirmed by verifier.
++                did_rollback = true;
+                 llama_memory_seq_rm(llama_get_memory(ctx), 0, (llama_pos) target_seq.size(), -1);
+                 prompt_dft.resize(target_seq.size());
+             }
+@@ -268,6 +293,7 @@ int main(int argc, char ** argv) {
+                 }
+             }
+         }
++        const int64_t t_sync_end_us = now_us();
+ 
+         if (prompt_dft.empty()) {
+             std::this_thread::sleep_for(std::chrono::milliseconds(args.poll_ms));
+@@ -275,6 +301,7 @@ int main(int argc, char ** argv) {
+         }
+ 
+         // Ensure next-token logits align to the current tail token after any rollback.
++        const int64_t t_tail_refresh_begin_us = now_us();
+         {
+             const llama_token tail = prompt_dft.back();
+             llama_memory_seq_rm(llama_get_memory(ctx), 0, (llama_pos) (prompt_dft.size() - 1), -1);
+@@ -286,8 +313,10 @@ int main(int argc, char ** argv) {
+                 continue;
+             }
+         }
++        const int64_t t_tail_refresh_end_us = now_us();
+ 
+         // Draft generation (greedy) and keep speculative tail in prompt_dft.
++        const int64_t t_draft_begin_us = now_us();
+         common_sampler_reset(smpl);
+         for (llama_token t : prompt_dft) {
+             common_sampler_accept(smpl, t, false);
+@@ -306,9 +335,11 @@ int main(int argc, char ** argv) {
+                 break;
+             }
+         }
++        const int64_t t_draft_end_us = now_us();
+ 
+         const std::string draft_text = common_detokenize(ctx, draft_ids, false);
+         const int id_last = accepted_ids.empty() ? -1 : accepted_ids.back();
++        const int64_t t_proposal_write_us = now_us();
+ 
+         json proposal = {
+             {"round", round_id},
+@@ -317,11 +348,33 @@ int main(int argc, char ** argv) {
+             {"draft_token_ids", draft_ids},
+             {"draft_text", draft_text},
+             {"n_max", n_max},
++            {"timing", {
++                {"loop_start_us", t_loop_us},
++                {"state_seen_us", t_state_seen_us},
++                {"decision_seen_us", t_decision_seen_us},
++                {"decision_to_draft_seen_us", decision_to_draft_seen_us},
++                {"sync_begin_us", t_sync_begin_us},
++                {"sync_end_us", t_sync_end_us},
++                {"tail_refresh_begin_us", t_tail_refresh_begin_us},
++                {"tail_refresh_end_us", t_tail_refresh_end_us},
++                {"draft_begin_us", t_draft_begin_us},
++                {"draft_end_us", t_draft_end_us},
++                {"proposal_write_us", t_proposal_write_us},
++                {"did_rollback", did_rollback},
++                {"did_hard_reset", did_hard_reset},
++            }},
+         };
+         write_json(proposal_path, proposal);
+ 
+-        LOG_INF("[draft-native] round %d id_last=%d drafted=%zu\n",
+-                round_id, id_last, draft_ids.size());
++        LOG_INF("[draft-native][timing] round=%d drafted=%zu sync=%.3fms tail=%.3fms draft=%.3fms decision->draft=%.3fms rollback=%d hard_reset=%d\n",
++                round_id,
++                draft_ids.size(),
++                (t_sync_end_us - t_sync_begin_us) / 1000.0,
++                (t_tail_refresh_end_us - t_tail_refresh_begin_us) / 1000.0,
++                (t_draft_end_us - t_draft_begin_us) / 1000.0,
++                decision_to_draft_seen_us >= 0 ? decision_to_draft_seen_us / 1000.0 : -1.0,
++                did_rollback ? 1 : 0,
++                did_hard_reset ? 1 : 0);
+ 
+         std::this_thread::sleep_for(std::chrono::milliseconds(args.poll_ms));
+     }
+diff --git a/examples/spec-split-verify/spec-split-verify.cpp b/examples/spec-split-verify/spec-split-verify.cpp
+index 1a20042a3..d9dbeb9cc 100644
+--- a/examples/spec-split-verify/spec-split-verify.cpp
++++ b/examples/spec-split-verify/spec-split-verify.cpp
+@@ -116,6 +116,10 @@ static void append_text(const fs::path & p, const std::string & s) {
+     f << s;
+ }
+ 
++static int64_t now_us() {
++    return ggml_time_us();
++}
++
+ int main(int argc, char ** argv) {
+     std::setlocale(LC_NUMERIC, "C");
+     common_init();
+@@ -229,6 +233,7 @@ int main(int argc, char ** argv) {
+     LOG_INF("[verify-native] started, shared_dir=%s\n", args.shared_dir.c_str());
+ 
+     while (true) {
++        const int64_t t_loop_us = now_us();
+         state = read_json(state_path);
+         json config = read_json(config_path);
+         if (state.is_null() || config.is_null()) {
+@@ -254,6 +259,7 @@ int main(int argc, char ** argv) {
+             std::this_thread::sleep_for(std::chrono::milliseconds(args.poll_ms));
+             continue;
+         }
++        const int64_t t_proposal_seen_us = now_us();
+ 
+         std::vector<llama_token> draft_ids;
+         if (proposal.contains("draft_token_ids") && proposal["draft_token_ids"].is_array()) {
+@@ -261,8 +267,17 @@ int main(int argc, char ** argv) {
+                 draft_ids.push_back(el.get<llama_token>());
+             }
+         }
++        int64_t proposal_to_verify_seen_us = -1;
++        if (proposal.contains("timing") && proposal["timing"].is_object()) {
++            const auto & tim = proposal["timing"];
++            if (tim.contains("proposal_write_us")) {
++                const int64_t t_prop_write_us = tim["proposal_write_us"].get<int64_t>();
++                proposal_to_verify_seen_us = t_proposal_seen_us - t_prop_write_us;
++            }
++        }
+ 
+         // Evaluate [id_last, draft...].
++        const int64_t t_decode_begin_us = now_us();
+         common_batch_clear(batch_tgt);
+         common_batch_add(batch_tgt, id_last, n_past++, { 0 }, true);
+         for (size_t i = 0; i < draft_ids.size(); ++i) {
+@@ -274,13 +289,16 @@ int main(int argc, char ** argv) {
+             std::this_thread::sleep_for(std::chrono::milliseconds(args.poll_ms));
+             continue;
+         }
++        const int64_t t_decode_end_us = now_us();
+ 
++        const int64_t t_sample_begin_us = now_us();
+         const auto ids = common_sampler_sample_and_accept_n(smpl, ctx, draft_ids);
+         if (ids.empty()) {
+             LOG_ERR("[verify-native] empty ids at round %d\n", round_id);
+             std::this_thread::sleep_for(std::chrono::milliseconds(args.poll_ms));
+             continue;
+         }
++        const int64_t t_sample_end_us = now_us();
+ 
+         n_past += (int) ids.size() - 1;
+         const int accepted_draft = std::max(0, (int) ids.size() - 1);
+@@ -293,7 +311,9 @@ int main(int argc, char ** argv) {
+         }
+ 
+         // Rollback non-accepted speculative tail in target KV.
++        const int64_t t_rollback_begin_us = now_us();
+         llama_memory_seq_rm(llama_get_memory(ctx), 0, n_past, -1);
++        const int64_t t_rollback_end_us = now_us();
+ 
+         const std::string result_text = common_detokenize(ctx, ids, false);
+         append_text(document_path, result_text);
+@@ -301,6 +321,8 @@ int main(int argc, char ** argv) {
+         bool has_eos = llama_vocab_is_eog(vocab, id_last);
+         const bool done = has_eos || ((int) accepted_ids.size() >= max_output_tokens);
+         const int new_accepted_pos = accepted_pos + (int) ids.size();
++        const int64_t t_decision_write_us = now_us();
++        const bool had_reject = accepted_draft < (int) draft_ids.size();
+ 
+         json decision = {
+             {"round", round_id},
+@@ -311,6 +333,22 @@ int main(int argc, char ** argv) {
+             {"new_accepted_pos", new_accepted_pos},
+             {"done", done},
+             {"exhausted", false},
++            {"timing", {
++                {"loop_start_us", t_loop_us},
++                {"proposal_seen_us", t_proposal_seen_us},
++                {"proposal_to_verify_seen_us", proposal_to_verify_seen_us},
++                {"decode_begin_us", t_decode_begin_us},
++                {"decode_end_us", t_decode_end_us},
++                {"sample_begin_us", t_sample_begin_us},
++                {"sample_end_us", t_sample_end_us},
++                {"rollback_begin_us", t_rollback_begin_us},
++                {"rollback_end_us", t_rollback_end_us},
++                {"decision_write_us", t_decision_write_us},
++                {"had_reject", had_reject},
++                {"draft_count", (int) draft_ids.size()},
++                {"accepted_draft", accepted_draft},
++                {"emitted_count", (int) ids.size()},
++            }},
+         };
+         write_json(decision_path, decision);
+ 
+@@ -323,8 +361,15 @@ int main(int argc, char ** argv) {
+         std::error_code ec;
+         fs::remove(proposal_path, ec);
+ 
+-        LOG_INF("[verify-native] round %d accepted_draft=%d emitted=%zu\n",
+-                round_id, accepted_draft, ids.size());
++        LOG_INF("[verify-native][timing] round=%d draft=%zu accept=%d reject=%d comm=%.3fms decode=%.3fms sample=%.3fms rollback=%.3fms\n",
++                round_id,
++                draft_ids.size(),
++                accepted_draft,
++                had_reject ? 1 : 0,
++                proposal_to_verify_seen_us >= 0 ? proposal_to_verify_seen_us / 1000.0 : -1.0,
++                (t_decode_end_us - t_decode_begin_us) / 1000.0,
++                (t_sample_end_us - t_sample_begin_us) / 1000.0,
++                (t_rollback_end_us - t_rollback_begin_us) / 1000.0);
+         if (done) {
+             LOG_INF("[verify-native] target stream fully emitted\n");
+             break;
+diff --git a/examples/speculative-simple/speculative-simple.cpp b/examples/speculative-simple/speculative-simple.cpp
+index a03dbce88..3579fa371 100644
+--- a/examples/speculative-simple/speculative-simple.cpp
++++ b/examples/speculative-simple/speculative-simple.cpp
+@@ -108,6 +108,14 @@ int main(int argc, char ** argv) {
+     int n_predict = 0;
+     int n_drafted = 0;
+     int n_accept  = 0;
++    int n_round   = 0;
++    int n_round_reject = 0;
++
++    int64_t t_draft_total_us    = 0;
++    int64_t t_decode_total_us   = 0;
++    int64_t t_sample_total_us   = 0;
++    int64_t t_post_total_us     = 0;
++    int64_t t_reject_post_us    = 0;
+ 
+     // used to determine end of generation
+     bool has_eos = false;
+@@ -147,6 +155,9 @@ int main(int argc, char ** argv) {
+     const auto t_dec_start = ggml_time_us();
+ 
+     while (true) {
++        ++n_round;
++        const auto t_round_begin = ggml_time_us();
++
+         // optionally, generate draft tokens that can be appended to the target batch
+         //
+         // this is the most important part of the speculation. the more probable tokens that are provided here
+@@ -154,7 +165,10 @@ int main(int argc, char ** argv) {
+         // offloaded to a remote device. it doesn't even have to be based on an LLM. instead, it can provide tokens
+         // from a cache or lookup tables.
+         //
++        const auto t_draft_begin = ggml_time_us();
+         llama_tokens draft = common_speculative_draft(spec, params_spec, prompt_tgt, id_last);
++        const auto t_draft_end = ggml_time_us();
++        t_draft_total_us += t_draft_end - t_draft_begin;
+ 
+         //LOG_DBG("draft: %s\n", string_from(ctx_dft, draft).c_str());
+ 
+@@ -163,6 +177,7 @@ int main(int argc, char ** argv) {
+         common_batch_add  (batch_tgt, id_last, n_past++, { 0 }, true);
+ 
+         // evaluate the target model on [id_last, draft0, draft1, ..., draftN-1]
++        const auto t_decode_begin = ggml_time_us();
+         {
+             // do not waste time on small drafts
+             if (draft.size() < (size_t) params_spec.n_min) {
+@@ -177,6 +192,8 @@ int main(int argc, char ** argv) {
+ 
+             llama_decode(ctx_tgt, batch_tgt);
+         }
++        const auto t_decode_end = ggml_time_us();
++        t_decode_total_us += t_decode_end - t_decode_begin;
+ 
+         // sample from the full target batch and return the accepted tokens based on the target sampler
+         //
+@@ -185,7 +202,10 @@ int main(int argc, char ** argv) {
+         // available logits from the batch and sample the next token until we run out of logits or the sampler
+         // disagrees with the draft
+         //
++        const auto t_sample_begin = ggml_time_us();
+         const auto ids = common_sampler_sample_and_accept_n(smpl, ctx_tgt, draft);
++        const auto t_sample_end = ggml_time_us();
++        t_sample_total_us += t_sample_end - t_sample_begin;
+ 
+         //LOG_DBG("ids: %s\n", string_from(ctx_tgt, ids).c_str());
+ 
+@@ -222,11 +242,31 @@ int main(int argc, char ** argv) {
+ 
+         LOG_DBG("accepted %d/%d draft tokens, the last target token is: (%d)\n", (int) ids.size() - 1, (int) draft.size(), id_last);
+ 
++        const auto t_post_begin = ggml_time_us();
+         {
+             LOG_DBG("clear kv cache from any extra tokens, n_past = %d\n", n_past);
+ 
+             llama_memory_seq_rm(llama_get_memory(ctx_tgt), 0, n_past, -1);
+         }
++        const auto t_post_end = ggml_time_us();
++        t_post_total_us += t_post_end - t_post_begin;
++
++        const bool had_reject = ((int) ids.size() - 1) < (int) draft.size();
++        if (had_reject) {
++            ++n_round_reject;
++            t_reject_post_us += t_post_end - t_post_begin;
++        }
++
++        LOG_INF("[spec-simple][timing] round=%d drafted=%zu accept=%d reject=%d draft=%.3fms decode=%.3fms sample=%.3fms post=%.3fms total=%.3fms\n",
++                n_round,
++                draft.size(),
++                (int) ids.size() - 1,
++                had_reject ? 1 : 0,
++                (t_draft_end - t_draft_begin) / 1000.0,
++                (t_decode_end - t_decode_begin) / 1000.0,
++                (t_sample_end - t_sample_begin) / 1000.0,
++                (t_post_end - t_post_begin) / 1000.0,
++                (t_post_end - t_round_begin) / 1000.0);
+ 
+         if ((params.n_predict >= 0 && n_predict > params.n_predict) || has_eos) {
+             break;
+@@ -248,6 +288,13 @@ int main(int argc, char ** argv) {
+     LOG_INF("n_drafted = %d\n", n_drafted);
+     LOG_INF("n_accept  = %d\n", n_accept);
+     LOG_INF("accept    = %.3f%%\n", 100.0f * n_accept / n_drafted);
++    LOG_INF("rounds    = %d\n", n_round);
++    LOG_INF("reject_rounds = %d\n", n_round_reject);
++    LOG_INF("timing_avg_draft_ms  = %.3f\n", n_round > 0 ? (t_draft_total_us / 1000.0) / n_round : 0.0);
++    LOG_INF("timing_avg_decode_ms = %.3f\n", n_round > 0 ? (t_decode_total_us / 1000.0) / n_round : 0.0);
++    LOG_INF("timing_avg_sample_ms = %.3f\n", n_round > 0 ? (t_sample_total_us / 1000.0) / n_round : 0.0);
++    LOG_INF("timing_avg_post_ms   = %.3f\n", n_round > 0 ? (t_post_total_us / 1000.0) / n_round : 0.0);
++    LOG_INF("timing_reject_post_avg_ms = %.3f\n", n_round_reject > 0 ? (t_reject_post_us / 1000.0) / n_round_reject : 0.0);
+ 
+     LOG_INF("\n");
+     LOG_INF("draft:\n\n");
+-- 
+2.50.1 (Apple Git-155)
+
