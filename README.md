@@ -2,70 +2,118 @@
 
 This demo shows how to separate speculative drafting and verification into two independent processes.
 
-- `draft_side.py` only proposes draft tokens and writes a proposal file.
-- `verify_side.py` reads the proposal, verifies it against a target stream, appends accepted output to a document, and writes a decision file.
+- `draft_side.py` proposes draft tokens and writes `proposal.json`.
+- `verify_side.py` reads proposal, verifies it, appends accepted output to `document.md`, and writes `decision.json`.
 
 Communication is done through shared files:
 
 - `shared/state.json`
+- `shared/config.json`
 - `shared/proposal.json`
 - `shared/decision.json`
 - `shared/document.md`
 
-## Project layout
+## Modes
 
-- `init_demo.py`: initialize shared state and target stream
-- `draft_side.py`: draft worker (proposal producer)
-- `verify_side.py`: verify worker (accept/reject + document writer)
-- `shared/`: file-bus directory
+### 1) `toy` mode (protocol-only)
 
-## 1) Setup
+- no model inference
+- deterministic target stream
+- used to validate round protocol quickly
 
 ```bash
-cd spec-split-demo-project
+cd /Users/doffin_azure/Code/Project/spec-split-demo-project
 ./setup_env.sh
-source .venv/bin/activate
-```
-
-## 2) Run verifier (terminal A)
-
-```bash
-python3 verify_side.py
-```
-
-## 3) Run drafter (terminal B)
-
-```bash
-python3 draft_side.py
-```
-
-The two processes will advance round by round until `done=true`.
-
-## One-command run
-
-```bash
 ./run_demo.sh
 tail -f shared/verify.log
 tail -f shared/draft.log
 ./clean_demo.sh
 ```
 
-## GitHub publish
+### 2) `model` mode (real dual-model test)
+
+- draft side calls `DRAFT_ENDPOINT/completion`
+- verify side calls `VERIFY_ENDPOINT/completion`
+- verifier applies token-id `sample_and_accept_n` semantics:
+  - compare sampled token against draft token id position-by-position
+  - stop at first mismatch
+  - if full draft matched, sample one extra token
+- model-mode exchange payload includes `draft_token_ids` and `result_token_ids`
 
 ```bash
-git init
-git add .
-git commit -m "feat: initial spec split demo"
-# then add your own remote:
-# git remote add origin https://github.com/<you>/spec-split-demo-project.git
-# git push -u origin main
+cd /Users/doffin_azure/Code/Project/spec-split-demo-project
+./setup_env.sh
+./run_model_demo.sh
+tail -f shared/verify_server.log
+tail -f shared/draft_server.log
+tail -f shared/verify.log
+tail -f shared/draft.log
+./clean_demo.sh
+```
+
+### 3) `model-native-verify` mode (closer to llama.cpp core path)
+
+- draft side uses `llama-server` (`/completion`)
+- verify side uses native binary `llama-spec-split-verify`
+- verify binary executes local `llama_decode + common_sampler_sample_and_accept_n`
+
+```bash
+cd /Users/doffin_azure/Code/Project/spec-split-demo-project
+./run_model_demo_native.sh
+tail -f shared/verify_native.log
+tail -f shared/draft.log
+./clean_demo.sh
+```
+
+### 4) `model-native-full` mode (draft + verify both native)
+
+- draft side: native binary `llama-spec-split-draft`
+- verify side: native binary `llama-spec-split-verify`
+- both sides hold persistent local contexts and communicate only through shared protocol files
+
+```bash
+cd /Users/doffin_azure/Code/Project/spec-split-demo-project
+./run_model_demo_native_full.sh
+tail -f shared/verify_native.log
+tail -f shared/draft_native.log
+./clean_demo.sh
+```
+
+In this mode, draft-side rollback is done with `llama_memory_seq_rm(...)` against unconfirmed speculative tail tokens before the next round proposal.
+
+## Run with custom models
+
+```bash
+DRAFT_MODEL=/abs/path/draft.gguf \
+VERIFY_MODEL=/abs/path/verify.gguf \
+PROMPT="Write one concise paragraph explaining speculative decoding." \
+N_MAX=4 MAX_OUTPUT_TOKENS=64 CTX_SIZE=512 \
+./run_model_demo.sh
+```
+
+Optional slot tuning for stable KV reuse across rounds:
+
+```bash
+DRAFT_SLOT_ID=0 VERIFY_SLOT_ID=0 ./run_model_demo.sh
+```
+
+## Cross-machine split
+
+When draft and verify are deployed on different machines, run the two servers independently and point workers to remote endpoints:
+
+```bash
+DRAFT_ENDPOINT=http://draft-host:8091 \
+VERIFY_ENDPOINT=http://verify-host:8092 \
+python -u draft_side.py
+
+DRAFT_ENDPOINT=http://draft-host:8091 \
+VERIFY_ENDPOINT=http://verify-host:8092 \
+python -u verify_side.py
 ```
 
 ## Notes
 
-- This is a protocol demo, not real model inference.
-- The verifier simulates `sample_and_accept_n` behavior:
-  - accept matching draft prefix
-  - stop at first mismatch and emit target token
-  - if full draft matches, emit one extra target token
-- `document.md` acts as the shared "manuscript" written by verifier and readable by drafter/others.
+- This is an engineering demo for split protocol and system integration.
+- `toy` mode is a whitespace simulation for fast protocol checks.
+- `model` mode uses token-id exchange through `/tokenize`, `/detokenize`, and `/completion` with deterministic greedy sampling (`temperature=0`, `top_k=1`).
+- See `SEPARATION_PLAN.md` for split design details and remaining gap to native in-process performance parity.

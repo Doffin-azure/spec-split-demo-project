@@ -18,6 +18,7 @@ stop_pid_file () {
 
 stop_pid_file "shared/verify.pid"
 stop_pid_file "shared/draft.pid"
+stop_pid_file "shared/verify_server.pid"
+stop_pid_file "shared/draft_server.pid"
 
 echo "stopped demo processes (if running)."
-

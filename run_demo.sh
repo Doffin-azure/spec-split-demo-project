@@ -12,10 +12,10 @@ source .venv/bin/activate
 
 python init_demo.py
 
-python verify_side.py > shared/verify.log 2>&1 &
+python -u verify_side.py > shared/verify.log 2>&1 &
 VERIFY_PID=$!
 
-python draft_side.py > shared/draft.log 2>&1 &
+python -u draft_side.py > shared/draft.log 2>&1 &
 DRAFT_PID=$!
 
 echo "$VERIFY_PID" > shared/verify.pid
@@ -31,4 +31,3 @@ echo "  tail -f shared/draft.log"
 echo ""
 echo "stop:"
 echo "  ./clean_demo.sh"
-
