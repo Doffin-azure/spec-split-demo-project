@@ -87,6 +87,10 @@ In this mode, draft-side rollback is done with `llama_memory_seq_rm(...)` agains
 - Upstream `llama.cpp` patch snapshots used by this project:
   - `upstream-patches/0001-examples-add-native-split-draft-verify-workers-for-s.patch`
   - `upstream-patches/0002-feat-add-stage-timing-instrumentation-and-split-vs-n.patch`
+- Upstream C++ source snapshots (for direct in-repo review):
+  - `upstream-src/llama.cpp/examples/spec-split-verify/spec-split-draft.cpp`
+  - `upstream-src/llama.cpp/examples/spec-split-verify/spec-split-verify.cpp`
+  - `upstream-src/llama.cpp/examples/speculative-simple/speculative-simple.cpp`
 
 ## Run with custom models
 
