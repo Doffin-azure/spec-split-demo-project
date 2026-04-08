@@ -1,0 +1,36 @@
+ANDROID_SPEC_EXPERIMENT
+health=ok
+verifierMode=llama_cpp_spec_split
+prompt=Explain speculative decoding briefly.
+draftModel=Llama-3.2-1B-Instruct-Q4_K_M.gguf
+targetModel=Llama-3.2-3B-Instruct-Q4_K_M.gguf
+draftMaxTokens=16
+maxAcceptedTokens=64
+steps=14
+committedTokens=20
+totalAcceptedTokens=20
+totalProposedTokens=173
+totalMs=41024
+totalDraftFetchMs=37150
+totalRemoteProposeMs=3730
+totalLocalApplyMs=0
+overallTokensPerSecond=0.488
+draftTokensPerSecond=4.657
+closeStatus=closed
+closeReason=android_experiment_complete
+acceptedText=Speculative decoding is a hypothetical method of decoding encrypted data, particularly in the context of cryptanalysis.
+traces:
+step=1 proposed=16 accepted=5 corrections=1 committed=6 draftFetchMs=3488 remoteMs=572 localApplyMs=0 prepareMs=260.920 decodeMs=339.611 sampleMs=2.026 rollbackMs=0.008 helperTotalMs=602.605 helperRoundTripMs=557.021 serviceTotalMs=557.098 estimatedTransportMs=14.902 finish=
+step=2 proposed=16 accepted=2 corrections=1 committed=9 draftFetchMs=3836 remoteMs=305 localApplyMs=0 prepareMs=0.001 decodeMs=316.987 sampleMs=0.481 rollbackMs=0.006 helperTotalMs=317.491 helperRoundTripMs=293.884 serviceTotalMs=293.932 estimatedTransportMs=11.068 finish=
+step=3 proposed=16 accepted=0 corrections=1 committed=10 draftFetchMs=3633 remoteMs=302 localApplyMs=0 prepareMs=0.000 decodeMs=317.501 sampleMs=0.208 rollbackMs=0.008 helperTotalMs=317.733 helperRoundTripMs=293.942 serviceTotalMs=293.993 estimatedTransportMs=8.007 finish=
+step=4 proposed=16 accepted=0 corrections=1 committed=11 draftFetchMs=3514 remoteMs=306 localApplyMs=0 prepareMs=0.001 decodeMs=320.889 sampleMs=0.200 rollbackMs=0.008 helperTotalMs=321.106 helperRoundTripMs=297.012 serviceTotalMs=297.049 estimatedTransportMs=8.951 finish=
+step=5 proposed=16 accepted=0 corrections=1 committed=12 draftFetchMs=3569 remoteMs=307 localApplyMs=0 prepareMs=0.000 decodeMs=304.758 sampleMs=0.303 rollbackMs=0.009 helperTotalMs=305.080 helperRoundTripMs=294.836 serviceTotalMs=294.928 estimatedTransportMs=12.072 finish=
+step=6 proposed=16 accepted=0 corrections=1 committed=13 draftFetchMs=3573 remoteMs=307 localApplyMs=0 prepareMs=0.001 decodeMs=310.655 sampleMs=0.205 rollbackMs=0.009 helperTotalMs=310.878 helperRoundTripMs=300.275 serviceTotalMs=300.313 estimatedTransportMs=6.687 finish=
+step=7 proposed=7 accepted=0 corrections=1 committed=14 draftFetchMs=1449 remoteMs=174 localApplyMs=0 prepareMs=0.000 decodeMs=173.148 sampleMs=0.187 rollbackMs=0.006 helperTotalMs=173.353 helperRoundTripMs=167.658 serviceTotalMs=167.699 estimatedTransportMs=6.301 finish=
+step=8 proposed=1 accepted=0 corrections=1 committed=15 draftFetchMs=641 remoteMs=86 localApplyMs=0 prepareMs=0.001 decodeMs=81.986 sampleMs=0.201 rollbackMs=0.009 helperTotalMs=82.206 helperRoundTripMs=80.115 serviceTotalMs=80.160 estimatedTransportMs=5.840 finish=
+step=9 proposed=16 accepted=0 corrections=1 committed=16 draftFetchMs=3653 remoteMs=314 localApplyMs=0 prepareMs=0.000 decodeMs=329.552 sampleMs=0.194 rollbackMs=0.008 helperTotalMs=329.767 helperRoundTripMs=305.315 serviceTotalMs=305.352 estimatedTransportMs=8.648 finish=
+step=10 proposed=16 accepted=0 corrections=1 committed=17 draftFetchMs=3590 remoteMs=305 localApplyMs=0 prepareMs=0.001 decodeMs=322.479 sampleMs=0.204 rollbackMs=0.008 helperTotalMs=322.702 helperRoundTripMs=298.624 serviceTotalMs=298.667 estimatedTransportMs=6.333 finish=
+step=11 proposed=16 accepted=0 corrections=1 committed=18 draftFetchMs=3637 remoteMs=312 localApplyMs=0 prepareMs=0.000 decodeMs=327.260 sampleMs=0.203 rollbackMs=0.008 helperTotalMs=327.490 helperRoundTripMs=302.932 serviceTotalMs=302.969 estimatedTransportMs=9.031 finish=
+step=12 proposed=16 accepted=0 corrections=1 committed=19 draftFetchMs=653 remoteMs=300 localApplyMs=0 prepareMs=0.001 decodeMs=316.512 sampleMs=0.203 rollbackMs=0.009 helperTotalMs=316.736 helperRoundTripMs=293.022 serviceTotalMs=293.074 estimatedTransportMs=6.926 finish=
+step=13 proposed=5 accepted=0 corrections=1 committed=20 draftFetchMs=1495 remoteMs=140 localApplyMs=0 prepareMs=0.000 decodeMs=142.734 sampleMs=0.188 rollbackMs=0.007 helperTotalMs=142.938 helperRoundTripMs=132.575 serviceTotalMs=132.611 estimatedTransportMs=7.389 finish=
+step=14 stopped draftCount=0

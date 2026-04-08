@@ -1,0 +1,28 @@
+﻿{
+    "generatedAt":  "2026-04-08 10:28:02 +08:00",
+    "startedAt":  "2026-04-08 10:26:16 +08:00",
+    "finishedAt":  "2026-04-08 10:28:02 +08:00",
+    "status":  "completed",
+    "failureReason":  "",
+    "exception":  "",
+    "deviceSerial":  "",
+    "packageName":  "com.example.myapplication",
+    "serviceComponent":  "com.example.myapplication/.SpeculativeExperimentService",
+    "receiverComponent":  "com.example.myapplication/.SpeculativeExperimentReceiver",
+    "baseUrl":  "http://127.0.0.1:8080",
+    "verifierMode":  "llama_cpp_spec_split",
+    "prompt":  "Explain speculative decoding briefly.",
+    "draftModelName":  "Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+    "targetModelPath":  "C:\\Users\\JXZ\\AndroidStudioProjects\\MyApplication2\\models\\Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    "archivedFiles":  {
+                          "startedAt":  "C:\\Users\\JXZ\\AndroidStudioProjects\\MyApplication2\\logs\\android_spec_split_run_started_at_2026-04-08T10-26-16+08-00.txt",
+                          "finishedAt":  "C:\\Users\\JXZ\\AndroidStudioProjects\\MyApplication2\\logs\\android_spec_split_run_finished_at_2026-04-08T10-26-16+08-00.txt",
+                          "android_spec_split_gradle_2026-04-08T10-26-16+08-00":  "C:\\Users\\JXZ\\AndroidStudioProjects\\MyApplication2\\reference\\spec-split-demo-project\\experiments\\2026-04-08\\android_spec_split_gradle_2026-04-08T10-26-16+08-00.log",
+                          "android_spec_split_broadcast_2026-04-08T10-26-16+08-00":  "C:\\Users\\JXZ\\AndroidStudioProjects\\MyApplication2\\reference\\spec-split-demo-project\\experiments\\2026-04-08\\android_spec_split_broadcast_2026-04-08T10-26-16+08-00.log",
+                          "android_spec_split_app_output_2026-04-08T10-26-16+08-00":  "C:\\Users\\JXZ\\AndroidStudioProjects\\MyApplication2\\reference\\spec-split-demo-project\\experiments\\2026-04-08\\android_spec_split_app_output_2026-04-08T10-26-16+08-00.txt",
+                          "android_spec_split_logcat_2026-04-08T10-26-16+08-00":  "C:\\Users\\JXZ\\AndroidStudioProjects\\MyApplication2\\reference\\spec-split-demo-project\\experiments\\2026-04-08\\android_spec_split_logcat_2026-04-08T10-26-16+08-00.log",
+                          "android_spec_split_model_push_2026-04-08T10-26-16+08-00":  "C:\\Users\\JXZ\\AndroidStudioProjects\\MyApplication2\\reference\\spec-split-demo-project\\experiments\\2026-04-08\\android_spec_split_model_push_2026-04-08T10-26-16+08-00.log",
+                          "android_spec_split_service_2026-04-08T10-26-16+08-00.out":  "C:\\Users\\JXZ\\AndroidStudioProjects\\MyApplication2\\reference\\spec-split-demo-project\\experiments\\2026-04-08\\android_spec_split_service_2026-04-08T10-26-16+08-00.out.log",
+                          "android_spec_split_service_2026-04-08T10-26-16+08-00.err":  "C:\\Users\\JXZ\\AndroidStudioProjects\\MyApplication2\\reference\\spec-split-demo-project\\experiments\\2026-04-08\\android_spec_split_service_2026-04-08T10-26-16+08-00.err.log"
+                      }
+}

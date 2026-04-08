@@ -1,0 +1,39 @@
+ANDROID_SPEC_EXPERIMENT
+health=ok
+verifierMode=llama_cpp_spec_split
+prompt=Explain speculative decoding briefly.
+draftModel=Llama-3.2-1B-Instruct-Q4_K_M.gguf
+targetModel=Llama-3.2-3B-Instruct-Q4_K_M.gguf
+draftMaxTokens=16
+maxAcceptedTokens=64
+steps=17
+committedTokens=26
+totalAcceptedTokens=26
+totalProposedTokens=44
+totalMs=15681
+totalDraftFetchMs=13522
+totalRemoteProposeMs=2000
+totalLocalApplyMs=0
+overallTokensPerSecond=1.658
+draftTokensPerSecond=3.254
+closeStatus=closed
+closeReason=android_experiment_complete
+acceptedText=Speculative decoding is a linguistic approach that attempts to interpret and reconstruct the meaning of ancient texts, such as those from the Bible,
+traces:
+step=1 proposed=7 accepted=5 corrections=1 committed=6 draftFetchMs=1640 remoteMs=431 localApplyMs=0 prepareMs=256.095 decodeMs=194.501 sampleMs=1.676 rollbackMs=0.005 helperTotalMs=452.304 helperRoundTripMs=418.134 serviceTotalMs=418.182 estimatedTransportMs=12.818 finish=
+step=2 proposed=1 accepted=0 corrections=1 committed=7 draftFetchMs=492 remoteMs=81 localApplyMs=0 prepareMs=0.000 decodeMs=79.403 sampleMs=0.198 rollbackMs=0.006 helperTotalMs=79.616 helperRoundTripMs=74.149 serviceTotalMs=74.209 estimatedTransportMs=6.791 finish=
+step=3 proposed=1 accepted=0 corrections=1 committed=8 draftFetchMs=427 remoteMs=85 localApplyMs=0 prepareMs=0.001 decodeMs=80.732 sampleMs=0.198 rollbackMs=0.006 helperTotalMs=80.947 helperRoundTripMs=75.396 serviceTotalMs=75.444 estimatedTransportMs=9.556 finish=
+step=4 proposed=1 accepted=0 corrections=1 committed=9 draftFetchMs=450 remoteMs=79 localApplyMs=0 prepareMs=0.000 decodeMs=79.175 sampleMs=0.328 rollbackMs=0.006 helperTotalMs=79.520 helperRoundTripMs=74.013 serviceTotalMs=74.047 estimatedTransportMs=4.953 finish=
+step=5 proposed=4 accepted=1 corrections=1 committed=11 draftFetchMs=1074 remoteMs=124 localApplyMs=0 prepareMs=0.000 decodeMs=122.863 sampleMs=0.326 rollbackMs=0.006 helperTotalMs=123.204 helperRoundTripMs=114.490 serviceTotalMs=114.536 estimatedTransportMs=9.464 finish=
+step=6 proposed=8 accepted=0 corrections=1 committed=12 draftFetchMs=1946 remoteMs=198 localApplyMs=0 prepareMs=0.001 decodeMs=204.211 sampleMs=0.198 rollbackMs=0.007 helperTotalMs=204.426 helperRoundTripMs=189.352 serviceTotalMs=189.385 estimatedTransportMs=8.615 finish=
+step=7 proposed=1 accepted=0 corrections=1 committed=13 draftFetchMs=412 remoteMs=90 localApplyMs=0 prepareMs=0.000 decodeMs=89.105 sampleMs=0.184 rollbackMs=0.006 helperTotalMs=89.306 helperRoundTripMs=83.384 serviceTotalMs=83.418 estimatedTransportMs=6.582 finish=
+step=8 proposed=3 accepted=0 corrections=1 committed=14 draftFetchMs=832 remoteMs=101 localApplyMs=0 prepareMs=0.001 decodeMs=101.526 sampleMs=0.190 rollbackMs=0.005 helperTotalMs=101.732 helperRoundTripMs=94.583 serviceTotalMs=94.618 estimatedTransportMs=6.382 finish=
+step=9 proposed=6 accepted=2 corrections=1 committed=17 draftFetchMs=1476 remoteMs=158 localApplyMs=0 prepareMs=0.000 decodeMs=160.274 sampleMs=0.667 rollbackMs=0.006 helperTotalMs=160.957 helperRoundTripMs=149.402 serviceTotalMs=149.436 estimatedTransportMs=8.564 finish=
+step=10 proposed=1 accepted=0 corrections=1 committed=18 draftFetchMs=515 remoteMs=83 localApplyMs=0 prepareMs=0.000 decodeMs=81.204 sampleMs=0.186 rollbackMs=0.007 helperTotalMs=81.406 helperRoundTripMs=75.828 serviceTotalMs=75.860 estimatedTransportMs=7.140 finish=
+step=11 proposed=1 accepted=0 corrections=1 committed=19 draftFetchMs=442 remoteMs=79 localApplyMs=0 prepareMs=0.001 decodeMs=76.460 sampleMs=0.206 rollbackMs=0.006 helperTotalMs=76.688 helperRoundTripMs=71.504 serviceTotalMs=71.541 estimatedTransportMs=7.459 finish=
+step=12 proposed=1 accepted=0 corrections=1 committed=20 draftFetchMs=442 remoteMs=90 localApplyMs=0 prepareMs=0.000 decodeMs=88.775 sampleMs=0.204 rollbackMs=0.007 helperTotalMs=88.996 helperRoundTripMs=83.050 serviceTotalMs=83.493 estimatedTransportMs=6.507 finish=
+step=13 proposed=4 accepted=1 corrections=1 committed=22 draftFetchMs=1090 remoteMs=128 localApplyMs=0 prepareMs=0.000 decodeMs=128.208 sampleMs=0.328 rollbackMs=0.005 helperTotalMs=128.551 helperRoundTripMs=119.513 serviceTotalMs=119.583 estimatedTransportMs=8.417 finish=
+step=14 proposed=2 accepted=0 corrections=1 committed=23 draftFetchMs=702 remoteMs=94 localApplyMs=0 prepareMs=0.001 decodeMs=93.944 sampleMs=0.202 rollbackMs=0.007 helperTotalMs=94.163 helperRoundTripMs=87.549 serviceTotalMs=87.595 estimatedTransportMs=6.405 finish=
+step=15 proposed=2 accepted=1 corrections=1 committed=25 draftFetchMs=656 remoteMs=97 localApplyMs=0 prepareMs=0.000 decodeMs=98.941 sampleMs=0.326 rollbackMs=0.006 helperTotalMs=99.283 helperRoundTripMs=92.127 serviceTotalMs=92.160 estimatedTransportMs=4.840 finish=
+step=16 proposed=1 accepted=0 corrections=1 committed=26 draftFetchMs=494 remoteMs=82 localApplyMs=0 prepareMs=0.000 decodeMs=79.258 sampleMs=0.190 rollbackMs=0.006 helperTotalMs=79.464 helperRoundTripMs=74.011 serviceTotalMs=74.066 estimatedTransportMs=7.934 finish=
+step=17 stopped draftCount=0

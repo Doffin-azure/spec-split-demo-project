@@ -1,0 +1,62 @@
+ANDROID_SPEC_EXPERIMENT
+health=ok
+verifierMode=llama_cpp_spec_split
+prompt=Explain speculative decoding briefly.
+draftModel=Llama-3.2-1B-Instruct-Q4_K_M.gguf
+targetModel=Llama-3.2-3B-Instruct-Q4_K_M.gguf
+draftMaxTokens=16
+maxAcceptedTokens=64
+steps=38
+committedTokens=64
+totalAcceptedTokens=64
+totalProposedTokens=111
+totalMs=37739
+totalDraftFetchMs=32942
+totalRemoteProposeMs=4633
+totalLocalApplyMs=0
+overallTokensPerSecond=1.696
+draftTokensPerSecond=3.370
+closeStatus=closed
+closeReason=android_experiment_complete
+acceptedText=Speculative decoding is a method in biblical criticism and biblical studies that aims to reconstruct the original text of the Hebrew Bible, the Christian Old Testament, and the Christian New Testament. The term "speculative" refers to the fact that this approach is based on hypotheses and educated guesses, rather than direct evidence or definitive proof.
+
+
+traces:
+step=1 proposed=11 accepted=6 corrections=1 committed=7 draftFetchMs=2581 remoteMs=528 localApplyMs=0 prepareMs=283.142 decodeMs=274.475 sampleMs=2.075 rollbackMs=0.005 helperTotalMs=559.727 helperRoundTripMs=517.289 serviceTotalMs=517.341 estimatedTransportMs=10.659 finish=
+step=2 proposed=2 accepted=0 corrections=1 committed=8 draftFetchMs=829 remoteMs=103 localApplyMs=0 prepareMs=0.000 decodeMs=100.119 sampleMs=0.194 rollbackMs=0.006 helperTotalMs=100.329 helperRoundTripMs=93.346 serviceTotalMs=93.390 estimatedTransportMs=9.610 finish=
+step=3 proposed=2 accepted=0 corrections=1 committed=9 draftFetchMs=470 remoteMs=101 localApplyMs=0 prepareMs=0.000 decodeMs=99.498 sampleMs=0.189 rollbackMs=0.006 helperTotalMs=99.703 helperRoundTripMs=92.663 serviceTotalMs=92.697 estimatedTransportMs=8.303 finish=
+step=4 proposed=2 accepted=0 corrections=1 committed=10 draftFetchMs=638 remoteMs=106 localApplyMs=0 prepareMs=0.000 decodeMs=104.724 sampleMs=0.362 rollbackMs=0.006 helperTotalMs=105.104 helperRoundTripMs=97.709 serviceTotalMs=97.755 estimatedTransportMs=8.245 finish=
+step=5 proposed=10 accepted=0 corrections=1 committed=11 draftFetchMs=2372 remoteMs=229 localApplyMs=0 prepareMs=0.000 decodeMs=241.714 sampleMs=0.202 rollbackMs=0.006 helperTotalMs=241.932 helperRoundTripMs=223.864 serviceTotalMs=223.901 estimatedTransportMs=5.099 finish=
+step=6 proposed=2 accepted=0 corrections=1 committed=12 draftFetchMs=651 remoteMs=113 localApplyMs=0 prepareMs=0.000 decodeMs=113.150 sampleMs=0.198 rollbackMs=0.007 helperTotalMs=113.366 helperRoundTripMs=105.344 serviceTotalMs=105.396 estimatedTransportMs=7.604 finish=
+step=7 proposed=1 accepted=0 corrections=1 committed=13 draftFetchMs=436 remoteMs=80 localApplyMs=0 prepareMs=0.000 decodeMs=79.382 sampleMs=0.194 rollbackMs=0.006 helperTotalMs=79.590 helperRoundTripMs=74.225 serviceTotalMs=74.277 estimatedTransportMs=5.723 finish=
+step=8 proposed=1 accepted=0 corrections=1 committed=14 draftFetchMs=426 remoteMs=105 localApplyMs=0 prepareMs=0.000 decodeMs=107.590 sampleMs=0.216 rollbackMs=0.007 helperTotalMs=107.824 helperRoundTripMs=100.264 serviceTotalMs=100.307 estimatedTransportMs=4.693 finish=
+step=9 proposed=2 accepted=1 corrections=1 committed=16 draftFetchMs=653 remoteMs=98 localApplyMs=0 prepareMs=0.000 decodeMs=96.261 sampleMs=0.314 rollbackMs=0.005 helperTotalMs=96.591 helperRoundTripMs=89.820 serviceTotalMs=89.863 estimatedTransportMs=8.137 finish=
+step=10 proposed=4 accepted=4 corrections=1 committed=21 draftFetchMs=1142 remoteMs=127 localApplyMs=0 prepareMs=0.000 decodeMs=128.617 sampleMs=0.683 rollbackMs=0.003 helperTotalMs=129.312 helperRoundTripMs=120.064 serviceTotalMs=120.105 estimatedTransportMs=6.895 finish=
+step=11 proposed=1 accepted=0 corrections=1 committed=22 draftFetchMs=576 remoteMs=78 localApplyMs=0 prepareMs=0.000 decodeMs=77.913 sampleMs=0.205 rollbackMs=0.008 helperTotalMs=78.137 helperRoundTripMs=72.831 serviceTotalMs=72.893 estimatedTransportMs=5.107 finish=
+step=12 proposed=2 accepted=1 corrections=1 committed=24 draftFetchMs=652 remoteMs=94 localApplyMs=0 prepareMs=0.001 decodeMs=87.872 sampleMs=0.284 rollbackMs=0.005 helperTotalMs=88.177 helperRoundTripMs=88.993 serviceTotalMs=89.029 estimatedTransportMs=4.971 finish=
+step=13 proposed=1 accepted=0 corrections=1 committed=25 draftFetchMs=500 remoteMs=80 localApplyMs=0 prepareMs=0.000 decodeMs=73.709 sampleMs=0.195 rollbackMs=0.007 helperTotalMs=73.921 helperRoundTripMs=74.539 serviceTotalMs=74.575 estimatedTransportMs=5.425 finish=
+step=14 proposed=1 accepted=0 corrections=1 committed=26 draftFetchMs=455 remoteMs=83 localApplyMs=0 prepareMs=0.000 decodeMs=75.851 sampleMs=0.169 rollbackMs=0.006 helperTotalMs=76.042 helperRoundTripMs=76.712 serviceTotalMs=76.751 estimatedTransportMs=6.249 finish=
+step=15 proposed=2 accepted=0 corrections=1 committed=27 draftFetchMs=659 remoteMs=101 localApplyMs=0 prepareMs=0.001 decodeMs=101.048 sampleMs=0.191 rollbackMs=0.007 helperTotalMs=101.259 helperRoundTripMs=94.489 serviceTotalMs=94.547 estimatedTransportMs=6.453 finish=
+step=16 proposed=2 accepted=2 corrections=1 committed=30 draftFetchMs=655 remoteMs=95 localApplyMs=0 prepareMs=0.000 decodeMs=96.262 sampleMs=0.427 rollbackMs=0.004 helperTotalMs=96.702 helperRoundTripMs=89.968 serviceTotalMs=90.005 estimatedTransportMs=4.995 finish=
+step=17 proposed=3 accepted=0 corrections=1 committed=31 draftFetchMs=947 remoteMs=111 localApplyMs=0 prepareMs=0.000 decodeMs=113.967 sampleMs=0.198 rollbackMs=0.006 helperTotalMs=114.181 helperRoundTripMs=106.101 serviceTotalMs=106.176 estimatedTransportMs=4.824 finish=
+step=18 proposed=2 accepted=0 corrections=1 committed=32 draftFetchMs=662 remoteMs=100 localApplyMs=0 prepareMs=0.001 decodeMs=102.540 sampleMs=0.210 rollbackMs=0.007 helperTotalMs=102.767 helperRoundTripMs=95.409 serviceTotalMs=95.443 estimatedTransportMs=4.557 finish=
+step=19 proposed=3 accepted=0 corrections=1 committed=33 draftFetchMs=866 remoteMs=105 localApplyMs=0 prepareMs=0.000 decodeMs=103.678 sampleMs=0.192 rollbackMs=0.006 helperTotalMs=103.885 helperRoundTripMs=96.534 serviceTotalMs=96.580 estimatedTransportMs=8.420 finish=
+step=20 proposed=3 accepted=1 corrections=1 committed=35 draftFetchMs=869 remoteMs=106 localApplyMs=0 prepareMs=0.000 decodeMs=108.098 sampleMs=0.316 rollbackMs=0.006 helperTotalMs=108.433 helperRoundTripMs=100.920 serviceTotalMs=100.965 estimatedTransportMs=5.035 finish=
+step=21 proposed=1 accepted=1 corrections=1 committed=37 draftFetchMs=494 remoteMs=83 localApplyMs=0 prepareMs=0.000 decodeMs=84.201 sampleMs=0.318 rollbackMs=0.004 helperTotalMs=84.535 helperRoundTripMs=78.614 serviceTotalMs=78.649 estimatedTransportMs=4.351 finish=
+step=22 proposed=1 accepted=1 corrections=1 committed=39 draftFetchMs=484 remoteMs=89 localApplyMs=0 prepareMs=0.000 decodeMs=89.557 sampleMs=0.349 rollbackMs=0.028 helperTotalMs=89.945 helperRoundTripMs=83.702 serviceTotalMs=83.749 estimatedTransportMs=5.251 finish=
+step=23 proposed=3 accepted=3 corrections=1 committed=43 draftFetchMs=902 remoteMs=111 localApplyMs=0 prepareMs=0.000 decodeMs=101.079 sampleMs=0.524 rollbackMs=0.003 helperTotalMs=101.615 helperRoundTripMs=102.273 serviceTotalMs=102.314 estimatedTransportMs=8.686 finish=
+step=24 proposed=6 accepted=1 corrections=1 committed=45 draftFetchMs=1629 remoteMs=156 localApplyMs=0 prepareMs=0.001 decodeMs=147.630 sampleMs=0.318 rollbackMs=0.006 helperTotalMs=147.965 helperRoundTripMs=148.811 serviceTotalMs=148.859 estimatedTransportMs=7.141 finish=
+step=25 proposed=5 accepted=1 corrections=1 committed=47 draftFetchMs=1381 remoteMs=215 localApplyMs=0 prepareMs=0.000 decodeMs=224.453 sampleMs=0.418 rollbackMs=0.007 helperTotalMs=224.890 helperRoundTripMs=208.403 serviceTotalMs=208.437 estimatedTransportMs=6.563 finish=
+step=26 proposed=3 accepted=0 corrections=1 committed=48 draftFetchMs=844 remoteMs=100 localApplyMs=0 prepareMs=0.001 decodeMs=102.623 sampleMs=0.516 rollbackMs=0.017 helperTotalMs=103.166 helperRoundTripMs=95.947 serviceTotalMs=95.989 estimatedTransportMs=4.011 finish=
+step=27 proposed=1 accepted=0 corrections=1 committed=49 draftFetchMs=410 remoteMs=83 localApplyMs=0 prepareMs=0.001 decodeMs=83.869 sampleMs=0.199 rollbackMs=0.009 helperTotalMs=84.087 helperRoundTripMs=78.178 serviceTotalMs=78.214 estimatedTransportMs=4.786 finish=
+step=28 proposed=1 accepted=0 corrections=1 committed=50 draftFetchMs=445 remoteMs=83 localApplyMs=0 prepareMs=0.001 decodeMs=79.534 sampleMs=0.188 rollbackMs=0.007 helperTotalMs=79.739 helperRoundTripMs=74.712 serviceTotalMs=74.796 estimatedTransportMs=8.204 finish=
+step=29 proposed=9 accepted=1 corrections=1 committed=52 draftFetchMs=2165 remoteMs=205 localApplyMs=0 prepareMs=0.001 decodeMs=215.726 sampleMs=0.355 rollbackMs=0.007 helperTotalMs=216.109 helperRoundTripMs=200.191 serviceTotalMs=200.227 estimatedTransportMs=4.773 finish=
+step=30 proposed=1 accepted=1 corrections=1 committed=54 draftFetchMs=489 remoteMs=82 localApplyMs=0 prepareMs=0.000 decodeMs=82.129 sampleMs=0.412 rollbackMs=0.004 helperTotalMs=82.555 helperRoundTripMs=77.023 serviceTotalMs=77.064 estimatedTransportMs=4.936 finish=
+step=31 proposed=2 accepted=1 corrections=1 committed=56 draftFetchMs=432 remoteMs=100 localApplyMs=0 prepareMs=0.001 decodeMs=97.927 sampleMs=0.326 rollbackMs=0.007 helperTotalMs=98.271 helperRoundTripMs=92.108 serviceTotalMs=92.287 estimatedTransportMs=7.713 finish=
+step=32 proposed=3 accepted=0 corrections=1 committed=57 draftFetchMs=913 remoteMs=103 localApplyMs=0 prepareMs=0.000 decodeMs=101.021 sampleMs=0.217 rollbackMs=0.008 helperTotalMs=101.255 helperRoundTripMs=94.049 serviceTotalMs=94.092 estimatedTransportMs=8.908 finish=
+step=33 proposed=9 accepted=1 corrections=1 committed=59 draftFetchMs=2382 remoteMs=228 localApplyMs=0 prepareMs=0.000 decodeMs=240.026 sampleMs=0.444 rollbackMs=0.006 helperTotalMs=240.486 helperRoundTripMs=222.517 serviceTotalMs=222.558 estimatedTransportMs=5.442 finish=
+step=34 proposed=1 accepted=0 corrections=1 committed=60 draftFetchMs=487 remoteMs=84 localApplyMs=0 prepareMs=0.000 decodeMs=85.307 sampleMs=0.196 rollbackMs=0.007 helperTotalMs=85.521 helperRoundTripMs=79.567 serviceTotalMs=79.603 estimatedTransportMs=4.397 finish=
+step=35 proposed=3 accepted=0 corrections=1 committed=61 draftFetchMs=859 remoteMs=102 localApplyMs=0 prepareMs=0.001 decodeMs=102.154 sampleMs=0.191 rollbackMs=0.006 helperTotalMs=102.362 helperRoundTripMs=95.213 serviceTotalMs=95.266 estimatedTransportMs=6.734 finish=
+step=36 proposed=3 accepted=0 corrections=1 committed=62 draftFetchMs=693 remoteMs=100 localApplyMs=0 prepareMs=0.000 decodeMs=101.363 sampleMs=0.193 rollbackMs=0.006 helperTotalMs=101.572 helperRoundTripMs=94.469 serviceTotalMs=94.509 estimatedTransportMs=5.491 finish=
+step=37 proposed=1 accepted=0 corrections=1 committed=63 draftFetchMs=447 remoteMs=84 localApplyMs=0 prepareMs=0.000 decodeMs=83.319 sampleMs=0.195 rollbackMs=0.007 helperTotalMs=83.534 helperRoundTripMs=77.830 serviceTotalMs=77.882 estimatedTransportMs=6.118 finish=
+step=38 proposed=1 accepted=0 corrections=1 committed=64 draftFetchMs=447 remoteMs=82 localApplyMs=0 prepareMs=0.000 decodeMs=81.771 sampleMs=0.180 rollbackMs=0.006 helperTotalMs=81.966 helperRoundTripMs=76.118 serviceTotalMs=76.166 estimatedTransportMs=5.834 finish=
